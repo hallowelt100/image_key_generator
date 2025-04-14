@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:image_key_generator/ImageProcess.dart';
 
 class TakePictureScreen extends StatefulWidget {
   const TakePictureScreen ({super.key, required this.camera});
@@ -82,6 +83,16 @@ class DisplayPictureScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text("Display the picture")),
       body: Image.file(File(imagePath)),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => ImageProcess(imagePath: imagePath,),
+            ),
+          );
+        },
+        child: const Icon(Icons.keyboard_arrow_right),
+      ),
     );
   }
 }
