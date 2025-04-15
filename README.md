@@ -2,7 +2,7 @@
 
 A Flutter project for an Android app, which generates a key for encrypted traffic using a image or the difference between two images.
 
-This is proof of concept app developed alongside my paper analysing the entropy of images and how to utilize them for key generation (released soon™️)
+This is a proof of concept app developed alongside my paper analysing the entropy of images and how to utilize them for key generation (released soon™️)
 
 ## Documentation and usage
 
