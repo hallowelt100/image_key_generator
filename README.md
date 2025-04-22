@@ -8,11 +8,18 @@ This is a proof of concept app developed alongside my paper analysing the entrop
 
 Documentation of the app will be done once the paper has been published.
 
+## Used dependencies
+
+- camera
+- image
+- crypto
+- pointycastle
+
 ## Things to do
 
 - [x] Take multiple pictures
 - [x] Calculate the difference of two images
 - [x] Calculate the entropy of the difference
 - [x] Allow the user to choose, which picture he wants to use to generate the key
-- [ ] Generate the key using a picture
+- [X] Generate the key using a picture
 - [ ] Allow multiple key choices

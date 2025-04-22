@@ -26,6 +26,7 @@ class ImageProcessState extends State<ImageProcess> {
   double? _entropy1;
   double? _entropy2;
 
+  List<int>? _difference;
   double? _diffenrenceEntropy;
 
   @override
@@ -58,6 +59,10 @@ class ImageProcessState extends State<ImageProcess> {
       }
 
       _calculateDifferenceEntropy(diffValues);
+
+      setState(() {
+        _difference = diffValues;
+      });
     }
   }
 
@@ -264,7 +269,7 @@ class ImageProcessState extends State<ImageProcess> {
                   onPressed: () {
                     Navigator.of(context).push(
                       MaterialPageRoute(
-                        builder: (context) => GenerateKeyScreen(selectedImage: _selectedImage,)
+                        builder: (context) => GenerateKeyScreen(imageData: _difference,)
             ),
           );
                   },
