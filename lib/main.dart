@@ -1,6 +1,5 @@
 import "package:camera/camera.dart";
 import "package:flutter/material.dart";
-import "TakePicture.dart";
 import "HomeScreen.dart";
 
 Future<void> main() async {

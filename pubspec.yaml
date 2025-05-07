@@ -41,6 +41,7 @@ dependencies:
   crypto: ^3.0.6
   pointycastle: ^4.0.0
   asn1lib: ^1.6.3
+  ds_collection: ^1.0.1
 
 dev_dependencies:
   flutter_test:

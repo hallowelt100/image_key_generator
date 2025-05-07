@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:image/image.dart' as img;
 import 'dart:math';
+import 'package:image_key_generator/huffman_coding.dart';
 
 import 'package:image_key_generator/GenerateKey.dart';
 
@@ -26,14 +27,42 @@ class ImageProcessState extends State<ImageProcess> {
   double? _entropy1;
   double? _entropy2;
 
+  bool _isLoading = true;
+
   List<int>? _difference;
   double? _diffenrenceEntropy;
+  Map<int, String>? _huffmanCodes;
+  List<int>? _compressedDifference;
+  double? _compressionRatio;
+  double? _originalEntropy;
+  double? _huffmanEntropy;
+  double? _encodingEfficiency;
 
   @override
   void initState() {
     super.initState();
     _calculateImageDifference();
     _calculateImageEntropy();
+  }
+
+  // Apply Huffman coding to the difference data
+  void _applyHuffmanCoding(List<int> diffValues) {
+    // Use the optimized HuffmanCoding class with the new parameter
+    final compressionResult = HuffmanCoding.compressData(diffValues, calculateMetrics: true);
+    
+    // Convert numeric codes to string format for display purposes
+    final stringCodes = HuffmanCoding.convertNumericCodesToStrings(
+      compressionResult['huffmanCodes'] as Map<int, List<int>>
+    );
+    
+    setState(() {
+      _huffmanCodes = stringCodes;
+      _compressedDifference = compressionResult['compressedData'];
+      _compressionRatio = compressionResult['compressionRatio'];
+      _originalEntropy = compressionResult['originalEntropy'];
+      _huffmanEntropy = compressionResult['huffmanEntropy'];
+      _encodingEfficiency = compressionResult['encodingEfficiency'];
+    });
   }
 
   void _calculateImageDifference() async {
@@ -54,25 +83,39 @@ class ImageProcessState extends State<ImageProcess> {
       List<int> diffValues = [];
       
       for (int i = 0; i < minLength; i++) {
-        int diff = (pixels1[i] - pixels2[i]).abs();
+        // Store the actual difference, including negative values
+        int diff = pixels1[i] - pixels2[i];
         diffValues.add(diff);
       }
 
       _calculateDifferenceEntropy(diffValues);
+      _applyHuffmanCoding(diffValues);
 
       setState(() {
+        _isLoading = false;
         _difference = diffValues;
       });
     }
   }
 
   void _calculateDifferenceEntropy(List<int> diffValues) {
-    final histogram = List.filled(256, 0);
+    // Find min and max values to determine histogram size
+    int minValue = 0;
+    int maxValue = 0;
+    
+    for (var diff in diffValues) {
+      if (diff < minValue) minValue = diff;
+      if (diff > maxValue) maxValue = diff;
+    }
+    
+    // Create a histogram that can hold all values from min to max
+    final int histogramSize = maxValue - minValue + 1;
+    final histogram = List.filled(histogramSize, 0);
     
     // Count occurrences of each difference value
     for (var diff in diffValues) {
-      // Ensure the difference value is within 0-255 range
-      int index = min(diff, 255);
+      // Calculate index relative to the minimum value
+      int index = diff - minValue;
       histogram[index]++;
     }
 
@@ -219,59 +262,41 @@ class ImageProcessState extends State<ImageProcess> {
                       if (_diffenrenceEntropy != null)
                         Text("Difference Entropy: ${_diffenrenceEntropy!.toStringAsFixed(3)} Bits",
                             style: const TextStyle(fontSize: 16)),
+                      if (_compressionRatio != null)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8.0),
+                          child: Text(
+                            "Huffman Compression Ratio: ${_compressionRatio!.toStringAsFixed(2)}x",
+                            style: const TextStyle(fontSize: 16, color: Colors.green),
+                          ),
+                        ),
+                      if (_originalEntropy != null)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8.0),
+                          child: Text(
+                            "Original Data Entropy: ${_originalEntropy!.toStringAsFixed(3)} bits/symbol",
+                            style: const TextStyle(fontSize: 16),
+                          ),
+                        ),
+                      if (_huffmanEntropy != null)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8.0),
+                          child: Text(
+                            "Huffman Codes Entropy: ${_huffmanEntropy!.toStringAsFixed(3)} bits/symbol",
+                            style: const TextStyle(fontSize: 16),
+                          ),
+                        ),
                     ],
                   ),
                   ),
                 ),
-                const Text("Generate the key using..."),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    ListTile(
-                      title: const Text("Image 1"),
-                      leading: Radio<SelectedImage>(
-                        value: SelectedImage.image1, 
-                        groupValue: _selectedImage, 
-                        onChanged: (SelectedImage? value) {
-                          setState(() {
-                            _selectedImage = value;
-                          });
-                        },
-                        ),
-                    ),
-                    ListTile(
-                      title: const Text("Image 2"),
-                      leading: Radio<SelectedImage>(
-                        value: SelectedImage.image2,
-                        groupValue: _selectedImage,
-                        onChanged: (SelectedImage? value) {
-                          setState(() {
-                            _selectedImage = value;
-                          });
-                        },
-                      ),
-                    ),
-                    ListTile(
-                      title: const Text("Difference"),
-                      leading: Radio<SelectedImage>(
-                        value: SelectedImage.difference,
-                        groupValue: _selectedImage,
-                        onChanged: (SelectedImage? value) {
-                          setState(() {
-                            _selectedImage = value;
-                          });
-                        },
-                      ),
-                    ),
-                  ],
-                ),
                 ElevatedButton(
-                  onPressed: () {
+                  onPressed: () {                    
                     Navigator.of(context).push(
                       MaterialPageRoute(
-                        builder: (context) => GenerateKeyScreen(imageData: _difference,)
-            ),
-          );
+                        builder: (context) => GenerateKeyScreen(imageData: _compressedDifference)
+                      ),
+                    );
                   },
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
