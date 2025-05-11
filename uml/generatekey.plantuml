@@ -1,0 +1,23 @@
+@startuml generatekey
+
+class GenerateKeyScreen {
+  -imageData : List<int>?
+  +GenerateKeyScreen(imageData)
+  +createState() : GenerateKeyScreenState
+}
+
+class GenerateKeyScreenState {
+  -isLoading : bool
+  -publicKey : String?
+  -privateKey : String?
+  +initState() : void
+  -generateKeyPair() : Future<void>
+  -encodeRSAPublicKeyToPem(publicKey) : String
+  -encodeRSAPrivateKeyToPem(privateKey) : String
+  +build(context) : Widget
+}
+
+ImageProcess --> GenerateKeyScreen : navigiert zu
+GenerateKeyScreen --> GenerateKeyScreenState : erstellt
+
+@enduml

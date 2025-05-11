@@ -1,0 +1,56 @@
+@startuml takepicture
+
+class DisplayPictureScreen {
+  -imagePath : String
+  +DisplayPictureScreen(imagePath)
+  +build(context) : Widget
+}
+
+class ImageProcess {
+  -imagePath1 : String
+  -imagePath2 : String
+  +ImageProcess(imagePath1, imagePath2)
+  +createState() : ImageProcessState
+}
+
+class ImageProcessState {
+  -entropy1 : double?
+  -entropy2 : double?
+  -difference : List<int>?
+  -differenceEntropy : double?
+  -selectedImage : SelectedImage?
+  -compressionResults : Map<String, dynamic>?
+  +initState() : void
+  -calculateImageDifference() : void
+  -calculateDifferenceEntropy(diffValues) : void
+  -calculateImageEntropy() : void
+  -processWithHuffman() : void
+  +build(context) : Widget
+}
+
+class HuffmanNode {
+  -value : int?
+  -frequency : int
+  -left : HuffmanNode?
+  -right : HuffmanNode?
+  +HuffmanNode(value, frequency, left, right)
+  +compareTo(other) : int
+}
+
+class HuffmanCoding {
+  {static} +buildHuffmanTree(frequencyMap) : HuffmanNode
+  {static} +generateHuffmanCodes(root) : Map<int, List<int>>
+  {static} -_generateCodesRecursive(node, code, huffmanCodes) : void
+  {static} +huffmanEncode(data, huffmanCodes) : List<bool>
+  {static} +bitsToBytes(bits) : Uint8List
+  {static} +compressData(data, calculateMetrics) : Map<String, dynamic>
+  {static} +convertNumericCodesToStrings(numericCodes) : Map<int, String>
+}
+
+TakePictureScreen --> ImageProcess : navigiert zu nach 2 Bildern
+DisplayPictureScreen --> ImageProcess : navigiert zu
+ImageProcess --> ImageProcessState : erstellt
+ImageProcessState --> HuffmanCoding : verwendet
+HuffmanCoding ..> HuffmanNode : erstellt und verwendet
+
+@enduml

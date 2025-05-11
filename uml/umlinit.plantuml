@@ -1,0 +1,38 @@
+@startuml umlinit
+
+class main {
+  +main() : Future<void>
+}
+
+class HomeScreen {
+  -camera : CameraDescription
+  +HomeScreen(camera)
+  +createState() : HomeScreenState
+}
+
+class HomeScreenState {
+  +initState() : void
+  +build(context) : Widget
+}
+
+class TakePictureScreen {
+  -camera : CameraDescription
+  +TakePictureScreen(camera)
+  +createState() : TakePictureScreenState
+}
+
+class TakePictureScreenState {
+  -controller : CameraController
+  -initializeControllerFuture : Future<void>
+  -capturedImages : List<String>
+  +initState() : void
+  +dispose() : void
+  +build(context) : Widget
+}
+
+main --> HomeScreen : erstellt
+HomeScreen --> HomeScreenState : erstellt
+HomeScreen --> TakePictureScreen : navigiert zu
+TakePictureScreen --> TakePictureScreenState : erstellt
+
+@enduml
